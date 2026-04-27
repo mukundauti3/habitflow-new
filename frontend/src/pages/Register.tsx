@@ -10,23 +10,41 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const res = await API.post("/auth/register", {
-      name,
-      email,
-      password,
-    });
+    // 🔥 basic validation
+    if (!name || !email || !password) {
+      alert("All fields are required ❌");
+      return;
+    }
 
-    // alert(res.data.message);
+    try {
+      console.log("📤 Sending:", { name, email, password });
 
-    // redirect to login
-    navigate("/");
-  } catch (err: any) {
-    alert(err.response?.data?.message || "Register failed ❌");
-  }
-};
+      const res = await API.post("/auth/register", {
+        name,
+        email,
+        password,
+      });
+
+      console.log("✅ Response:", res.data);
+
+      alert("Register success ✅");
+
+      navigate("/"); // go to login
+    } catch (err: any) {
+      console.error("❌ FULL ERROR:", err);
+
+      if (err.response) {
+        console.log("❌ Backend Error:", err.response.data);
+        alert(err.response.data.message || "Register failed ❌");
+      } else if (err.request) {
+        alert("❌ No response from server (backend not reachable)");
+      } else {
+        alert("❌ Error: " + err.message);
+      }
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -37,18 +55,14 @@ export default function Register() {
           style={styles.input}
           placeholder="Name"
           value={name}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setName(e.target.value)
-          }
+          onChange={(e) => setName(e.target.value)}
         />
 
         <input
           style={styles.input}
           placeholder="Email"
           value={email}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
@@ -56,12 +70,12 @@ export default function Register() {
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setPassword(e.target.value)
-          }
+          onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button style={styles.button}>Register</button>
+        <button style={styles.button} type="submit">
+          Register
+        </button>
 
         <p style={styles.link} onClick={() => navigate("/")}>
           Already have account? Login
@@ -71,7 +85,6 @@ export default function Register() {
   );
 }
 
-// ✅ FIXED TYPE HERE
 const styles: { [key: string]: CSSProperties } = {
   container: {
     height: "100vh",

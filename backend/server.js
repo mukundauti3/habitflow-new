@@ -4,10 +4,13 @@ const cors = require("cors");
 
 const app = express();
 
+// ================= DEBUG ENV =================
+console.log("🌐 FRONTEND_URL:", process.env.FRONTEND_URL);
+
 // ================= MIDDLEWARE =================
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*", // ✅ allow frontend
+    origin: process.env.FRONTEND_URL || "*", // allow frontend (Vercel)
     credentials: true,
   })
 );
@@ -17,10 +20,18 @@ app.use(express.json());
 // ================= ROUTE LOADER =================
 const loadRoute = (path, route) => {
   try {
-    app.use(path, require(route));
+    const routeModule = require(route);
+
+    if (typeof routeModule !== "function") {
+      console.warn(`⚠️ Invalid route export: ${route}`);
+      return;
+    }
+
+    app.use(path, routeModule);
     console.log(`✅ Loaded route: ${path}`);
   } catch (err) {
-    console.warn(`⚠️ Route missing: ${route}`);
+    console.error(`❌ Failed to load route: ${route}`);
+    console.error(err.message);
   }
 };
 
@@ -38,14 +49,21 @@ app.get("/", (req, res) => {
   res.send("HabitFlow API Running 🚀");
 });
 
+// 🔥 TEST REGISTER ROUTE (IMPORTANT DEBUG)
+app.post("/test-register", (req, res) => {
+  console.log("📥 Test Register Hit:", req.body);
+  res.json({ message: "Test route working ✅" });
+});
+
 // ================= 404 HANDLER =================
 app.use((req, res) => {
+  console.warn("❌ 404 Route:", req.originalUrl);
   res.status(404).json({ message: "Route not found ❌" });
 });
 
 // ================= ERROR HANDLER =================
 app.use((err, req, res, next) => {
-  console.error("🔥 Error:", err.message);
+  console.error("🔥 Error:", err);
   res.status(500).json({ message: "Server error ❌" });
 });
 
