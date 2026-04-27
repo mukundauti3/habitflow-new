@@ -17,55 +17,34 @@ app.use(
 
 app.use(express.json());
 
-// ================= ROUTES (DIRECT LOAD - NO BUGS) =================
-try {
-  app.use("/auth", require("./routes/authRoutes"));
-  console.log("✅ Loaded route: /auth");
-} catch (err) {
-  console.error("❌ Failed to load /auth:", err.message);
-}
+// ================= ROUTES =================
+const routes = [
+  { path: "/auth", file: "./routes/authRoutes" },
+  { path: "/habits", file: "./routes/habitRoutes" },
+  { path: "/tasks", file: "./routes/taskRoutes" },
+  { path: "/notes", file: "./routes/noteRoutes" },
+  { path: "/sleep", file: "./routes/sleepRoutes" },
+  { path: "/journal", file: "./routes/journalRoutes" },
+  { path: "/workout", file: "./routes/workoutRoutes" },
+];
 
-try {
-  app.use("/habits", require("./routes/habitRoutes"));
-  console.log("✅ Loaded route: /habits");
-} catch (err) {
-  console.error("❌ Failed to load /habits:", err.message);
-}
+routes.forEach(({ path, file }) => {
+  try {
+    const route = require(file);
 
-try {
-  app.use("/tasks", require("./routes/taskRoutes"));
-  console.log("✅ Loaded route: /tasks");
-} catch (err) {
-  console.error("❌ Failed to load /tasks:", err.message);
-}
+    // 🔥 check if router exists
+    if (!route) {
+      console.warn(`⚠️ Empty route: ${file}`);
+      return;
+    }
 
-try {
-  app.use("/notes", require("./routes/noteRoutes"));
-  console.log("✅ Loaded route: /notes");
-} catch (err) {
-  console.error("❌ Failed to load /notes:", err.message);
-}
-
-try {
-  app.use("/sleep", require("./routes/sleepRoutes"));
-  console.log("✅ Loaded route: /sleep");
-} catch (err) {
-  console.error("❌ Failed to load /sleep:", err.message);
-}
-
-try {
-  app.use("/journal", require("./routes/journalRoutes"));
-  console.log("✅ Loaded route: /journal");
-} catch (err) {
-  console.error("❌ Failed to load /journal:", err.message);
-}
-
-try {
-  app.use("/workout", require("./routes/workoutRoutes"));
-  console.log("✅ Loaded route: /workout");
-} catch (err) {
-  console.error("❌ Failed to load /workout:", err.message);
-}
+    app.use(path, route);
+    console.log(`✅ Loaded route: ${path}`);
+  } catch (err) {
+    console.error(`❌ Failed to load ${file}`);
+    console.error(err.message);
+  }
+});
 
 // ================= TEST ROUTE =================
 app.get("/", (req, res) => {
@@ -86,7 +65,7 @@ app.use((req, res) => {
 
 // ================= ERROR HANDLER =================
 app.use((err, req, res, next) => {
-  console.error("🔥 Error:", err);
+  console.error("🔥 Error:", err.stack);
   res.status(500).json({ message: "Server error ❌" });
 });
 
