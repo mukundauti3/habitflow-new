@@ -1,16 +1,16 @@
 import axios from "axios";
 
-// ✅ use env variable (VERY IMPORTANT)
+// 🔥 directly use Railway backend URL
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "https://your-backend-url.up.railway.app", // 👈 replace this
 });
 
-// ✅ attach token properly
+// ✅ attach token
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
 
   if (token) {
-    req.headers.Authorization = `Bearer ${token}`; // 🔥 FIXED
+    req.headers.Authorization = `Bearer ${token}`;
   }
 
   return req;
