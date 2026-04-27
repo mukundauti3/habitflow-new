@@ -7,42 +7,49 @@ export default function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // 🔥 loading state
   const navigate = useNavigate();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🔥 basic validation
+    if (loading) return; // prevent double click
+
+    // ✅ validation
     if (!name || !email || !password) {
       alert("All fields are required ❌");
       return;
     }
 
     try {
+      setLoading(true);
+
       console.log("📤 Sending:", { name, email, password });
 
-      const res = await API.post("/auth/register", {
-        name,
-        email,
-        password,
-      });
+      const res = await API.post(
+        "/auth/register",
+        { name, email, password },
+        { timeout: 10000 } // 🔥 prevent infinite loading
+      );
 
       console.log("✅ Response:", res.data);
 
       alert("Register success ✅");
+      navigate("/");
 
-      navigate("/"); // go to login
     } catch (err: any) {
       console.error("❌ FULL ERROR:", err);
 
       if (err.response) {
-        console.log("❌ Backend Error:", err.response.data);
         alert(err.response.data.message || "Register failed ❌");
-      } else if (err.request) {
-        alert("❌ No response from server (backend not reachable)");
+      } else if (err.code === "ECONNABORTED") {
+        alert("⏳ Server timeout (Railway sleeping)");
       } else {
-        alert("❌ Error: " + err.message);
+        alert("❌ Backend not reachable");
       }
+
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,7 +81,7 @@ export default function Register() {
         />
 
         <button style={styles.button} type="submit">
-          Register
+          {loading ? "Registering..." : "Register"}
         </button>
 
         <p style={styles.link} onClick={() => navigate("/")}>
