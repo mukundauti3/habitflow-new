@@ -1,6 +1,6 @@
 const mysql = require("mysql2");
 
-// ✅ STRICT ENV (no fallback)
+// ✅ Create pool (Railway friendly)
 const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -13,22 +13,27 @@ const db = mysql.createPool({
   queueLimit: 0,
 });
 
-// 🔍 Debug logs (VERY IMPORTANT)
+// ✅ Use promise wrapper (VERY IMPORTANT for async/await)
+const promiseDb = db.promise();
+
+// 🔍 Debug logs
 console.log("🔍 DB CONFIG:");
 console.log("HOST:", process.env.DB_HOST);
 console.log("USER:", process.env.DB_USER);
 console.log("DB:", process.env.DB_NAME);
 console.log("PORT:", process.env.DB_PORT);
 
-// 🔥 Test connection
-db.getConnection((err, connection) => {
-  if (err) {
-    console.error("❌ DB Connection Failed FULL ERROR:");
-    console.error(err); // FULL error (not just message)
-  } else {
+// 🔥 Test connection properly
+(async () => {
+  try {
+    const connection = await promiseDb.getConnection();
     console.log("✅ MySQL Connected");
     connection.release();
+  } catch (err) {
+    console.error("❌ DB Connection Failed FULL ERROR:");
+    console.error(err);
   }
-});
+})();
 
-module.exports = db;
+// ✅ Export promise-based pool
+module.exports = promiseDb;
