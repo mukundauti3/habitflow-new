@@ -7,7 +7,7 @@ const app = express();
 // ================= MIDDLEWARE =================
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*", // ✅ FIXED
+    origin: process.env.FRONTEND_URL || "*", // ✅ allow frontend
     credentials: true,
   })
 );
