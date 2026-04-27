@@ -29,7 +29,7 @@ export default function Register() {
       const res = await API.post(
         "/auth/register",
         { name, email, password },
-        { timeout: 10000 } // 🔥 prevent infinite loading
+        { timeout: 1000000 } // 🔥 prevent infinite loading
       );
 
       console.log("✅ Response:", res.data);
