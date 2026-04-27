@@ -1,8 +1,8 @@
 import axios from "axios";
 
-// 🔥 directly use Railway backend URL
+// 🔥 YOUR REAL BACKEND URL
 const API = axios.create({
-  baseURL: "https://your-backend-url.up.railway.app", // 👈 replace this
+  baseURL: "https://habitflow-new-production.up.railway.app",
 });
 
 // ✅ attach token
