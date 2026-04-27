@@ -3,6 +3,7 @@ import axios from "axios";
 // ✅ backend URL (Railway)
 const API = axios.create({
   baseURL: "https://habitflow-new-production.up.railway.app",
+  timeout: 30000, // 🔥 IMPORTANT: wait for Railway wake-up
   headers: {
     "Content-Type": "application/json",
   },
@@ -22,13 +23,29 @@ API.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ handle response errors (VERY IMPORTANT)
+// ✅ handle response errors + retry logic
 API.interceptors.response.use(
   (res) => res,
-  (error) => {
+  async (error) => {
     console.error("API Error:", error?.response?.data || error.message);
 
-    // optional: auto logout if token invalid
+    // 🔥 HANDLE RAILWAY SLEEP (AUTO RETRY ONCE)
+    if (
+      error.code === "ECONNABORTED" || // timeout
+      error.message.includes("timeout") ||
+      error.message.includes("Network Error")
+    ) {
+      console.warn("⚠️ Server sleeping... retrying request");
+
+      try {
+        // retry request once
+        return await API.request(error.config);
+      } catch (retryError) {
+        return Promise.reject(retryError);
+      }
+    }
+
+    // 🔐 auto logout if token invalid
     if (error?.response?.status === 401) {
       localStorage.removeItem("token");
     }
