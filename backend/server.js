@@ -10,46 +10,69 @@ console.log("🌐 FRONTEND_URL:", process.env.FRONTEND_URL);
 // ================= MIDDLEWARE =================
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*", // allow frontend (Vercel)
+    origin: process.env.FRONTEND_URL || "*",
     credentials: true,
   })
 );
 
 app.use(express.json());
 
-// ================= ROUTE LOADER =================
-const loadRoute = (path, route) => {
-  try {
-    const routeModule = require(route);
+// ================= ROUTES (DIRECT LOAD - NO BUGS) =================
+try {
+  app.use("/auth", require("./routes/authRoutes"));
+  console.log("✅ Loaded route: /auth");
+} catch (err) {
+  console.error("❌ Failed to load /auth:", err.message);
+}
 
-    if (typeof routeModule !== "function") {
-      console.warn(`⚠️ Invalid route export: ${route}`);
-      return;
-    }
+try {
+  app.use("/habits", require("./routes/habitRoutes"));
+  console.log("✅ Loaded route: /habits");
+} catch (err) {
+  console.error("❌ Failed to load /habits:", err.message);
+}
 
-    app.use(path, routeModule);
-    console.log(`✅ Loaded route: ${path}`);
-  } catch (err) {
-    console.error(`❌ Failed to load route: ${route}`);
-    console.error(err.message);
-  }
-};
+try {
+  app.use("/tasks", require("./routes/taskRoutes"));
+  console.log("✅ Loaded route: /tasks");
+} catch (err) {
+  console.error("❌ Failed to load /tasks:", err.message);
+}
 
-// ================= ROUTES =================
-loadRoute("/auth", "./routes/authRoutes");
-loadRoute("/habits", "./routes/habitRoutes");
-loadRoute("/tasks", "./routes/taskRoutes");
-loadRoute("/notes", "./routes/noteRoutes");
-loadRoute("/sleep", "./routes/sleepRoutes");
-loadRoute("/journal", "./routes/journalRoutes");
-loadRoute("/workout", "./routes/workoutRoutes");
+try {
+  app.use("/notes", require("./routes/noteRoutes"));
+  console.log("✅ Loaded route: /notes");
+} catch (err) {
+  console.error("❌ Failed to load /notes:", err.message);
+}
+
+try {
+  app.use("/sleep", require("./routes/sleepRoutes"));
+  console.log("✅ Loaded route: /sleep");
+} catch (err) {
+  console.error("❌ Failed to load /sleep:", err.message);
+}
+
+try {
+  app.use("/journal", require("./routes/journalRoutes"));
+  console.log("✅ Loaded route: /journal");
+} catch (err) {
+  console.error("❌ Failed to load /journal:", err.message);
+}
+
+try {
+  app.use("/workout", require("./routes/workoutRoutes"));
+  console.log("✅ Loaded route: /workout");
+} catch (err) {
+  console.error("❌ Failed to load /workout:", err.message);
+}
 
 // ================= TEST ROUTE =================
 app.get("/", (req, res) => {
   res.send("HabitFlow API Running 🚀");
 });
 
-// 🔥 TEST REGISTER ROUTE (IMPORTANT DEBUG)
+// 🔥 DEBUG ROUTE
 app.post("/test-register", (req, res) => {
   console.log("📥 Test Register Hit:", req.body);
   res.json({ message: "Test route working ✅" });
