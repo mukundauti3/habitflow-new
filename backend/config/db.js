@@ -1,25 +1,30 @@
 const mysql = require("mysql2");
 
-// 🔥 Use pool (better for production)
+// ✅ STRICT ENV (no fallback)
 const db = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "",
-  database: process.env.DB_NAME || "test",
-  port: process.env.DB_PORT || 3306,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: Number(process.env.DB_PORT) || 3306,
+
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
 
-// 🔍 Test connection
-db.getConnection((err, connection) => {
-  console.log("DB_HOST:", process.env.DB_HOST);
-console.log("DB_USER:", process.env.DB_USER);
-console.log("DB_NAME:", process.env.DB_NAME);
-  if (err) {
-    console.error("❌ DB Connection Failed:", err.message);
+// 🔍 Debug logs (VERY IMPORTANT)
+console.log("🔍 DB CONFIG:");
+console.log("HOST:", process.env.DB_HOST);
+console.log("USER:", process.env.DB_USER);
+console.log("DB:", process.env.DB_NAME);
+console.log("PORT:", process.env.DB_PORT);
 
+// 🔥 Test connection
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("❌ DB Connection Failed FULL ERROR:");
+    console.error(err); // FULL error (not just message)
   } else {
     console.log("✅ MySQL Connected");
     connection.release();
