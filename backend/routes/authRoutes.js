@@ -5,6 +5,10 @@ const jwt = require("jsonwebtoken");
 const db = require("../config/db");
 
 // ================= REGISTER =================
+
+router.get("/register", (req, res) => {
+  res.send("GET register working ✅");
+});
 router.post("/register", async (req, res) => {
   try {
     const { email, password, name } = req.body;
